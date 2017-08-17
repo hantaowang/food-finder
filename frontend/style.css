@@ -1,0 +1,7 @@
+.card-img-top{
+  max-height: 300px;
+}
+
+.card:hover{
+  background-color: red;
+}
