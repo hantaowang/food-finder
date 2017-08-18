@@ -1,26 +1,31 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.utils.datastructures import MultiValueDictKeyError
+from django.views.decorators.csrf import csrf_exempt
+
+import redis, datetime
+from random import randint
 from .auth import *
 
-# Create your views here.
+r = redis.StrictRedis(host='0.0.0.0', port=6379)
 
+@csrf_exempt
 def index(request):
-    if validate(request.GET, ['TYPE']) != True:
-            msg = "[ERROR] Missing Field: " + validate(request.GET, ['TYPE'])
-            return HttpResponse(msg)
-    type = request.GET['TYPE']
+    try:
+        type = request.POST['TYPE']
 
-    if type == "createuser":
-        if validate(request.GET, ['NAME']) != True:
-            msg = "[ERROR] Missing Field: " + validate(request.GET, ['NAME'])
-            return HttpResponse(msg)
-        salt = generate_new_user(request.GET['NAME'])
-        return HttpResponse(salt)
-           
-
-# Validates that the necessary fields exist in the request
-def validate(dict, fields):
-    for f in fields:
-        if f not in fields:
-            return f
-    return True
+        if type == "createuser":
+            msg = generate_new_user(request.POST['NAME'], request.POST['PASS'])
+        if type == 'validate':
+            if validate(request.POST['NAME'], request.POST['PASS']):
+                session = randint(100000, 999999)
+                while r.exists(session) == 1:
+                    session = randint(100000, 999999)
+                r.hset(session, "time", str(datetime.datetime.now()))
+                r.hset(session, "name", request.POST['NAME'])
+            msg = session
+        else:
+            msg = "[ERROR] Invalid Command"
+    except MultiValueDictKeyError as err:
+        msg = "[ERROR] Missing POST Parameter: {0}".format(str(err)[1:-1])
+    return HttpResponse(msg)
