@@ -15,7 +15,7 @@ CLIENT_ID = 'Atz_4eQ6jE5PY839AWdoAQ'
 CLIENT_SECRET='raGawm10KZyS4pHsszfjKgE8LjjpIXkAehDfQeBVIIqwwHgKWCDOBQ2slAUMOdZI'
 
 # Redis Client_ID
-# r = redis.StrictRedis(host='0.0.0.0', port=6379)
+r = redis.StrictRedis(host='0.0.0.0', port=6379)
 
 def getAuth():
     url = 'https://api.yelp.com/oauth2/token'
@@ -31,13 +31,13 @@ def getAuth():
     auth_token = response.json()['access_token']
     return auth_token
 
-def query_restaurants(location):
+def query_restaurants(session, location):
     # Check to see if there is already an auth_token with sessionID (with Redis)
-    # auth_token = r.hget(session, 'Auth_Token')
-    # if auth_token == None:
-    #    auth_token = getAuth()
-    #    r.hset(session, 'Auth_Token', auth_token)
-    auth_token = getAuth()
+    auth_token = r.hget(session, 'Auth_Token')
+    if auth_token == None:
+       auth_token = getAuth()
+       r.hset(session, 'Auth_Token', auth_token)
+
     url_params = {
         'term': 'restaurants',
         'location': location.replace(' ', '+'),
@@ -62,8 +62,8 @@ def query_restaurants(location):
                 categories[category] = 0
     print(restaurants)
     print(categories)
-    # r.hset(session, 'restaurants', restaurants)
-    # r.hset(session, 'categories', categories)
+    r.hset(session, 'restaurants', restaurants)
+    r.hset(session, 'categories', categories)
 
 # Used for unit testing
 if __name__ == '__main__':
@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
     try:
         if args.loc:
-            query_restaurants(args.loc)
+            query_restaurants(123456, args.loc)
     except HTTPError as error:
         sys.exit(
             'Encountered HTTP error {0} on {1}:\n {2}\nAbort program.'.format(
