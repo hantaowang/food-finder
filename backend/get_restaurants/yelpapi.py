@@ -9,10 +9,6 @@ from urllib.error import HTTPError
 from urllib.parse import quote
 from urllib.parse import urlencode
 
-# Some constants for API calls
-API_HOST = 'https://api.yelp.com'
-SEARCH_PATH = '/v3/businesses/search'
-
 # TODO
 # Client_ID and Client_Secret constants (MUST REMOVE IF REPO IS PUBLIC)
 CLIENT_ID = 'Atz_4eQ6jE5PY839AWdoAQ'
@@ -36,9 +32,23 @@ def getAuth():
     return auth_token
 
 def query_restaurants(location):
-    # Check to see if there is already an auth_token with sessionID
-    #
-    #
+    # Check to see if there is already an auth_token with sessionID (with Redis)
+    # auth_token = r.hget('Auth_Token')
+    # if auth_token == None:
+    #    auth_token = getAuth()
+    auth_token = getAuth()
+    url_params = {
+        'term': 'restaurants',
+        'location': location.replace(' ', '+'),
+        'radius' : 3200,
+        'limit' : 20,
+    }
+    url = 'https://api.yelp.com/v3/businesses/search'
+    headers = {
+        'Authorization': 'Bearer {0}'.format(auth_token),
+    }
+    response = requests.request('GET', url, headers=headers, params=url_params).json()
+    print(response)
 
 # Used for unit testing
 if __name__ == '__main__':
@@ -52,7 +62,7 @@ if __name__ == '__main__':
 
     try:
         if args.loc:
-            query_restaurants('restaurants', args.loc)
+            query_restaurants(args.loc)
     except HTTPError as error:
         sys.exit(
             'Encountered HTTP error {0} on {1}:\n {2}\nAbort program.'.format(
