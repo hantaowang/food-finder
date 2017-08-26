@@ -33,9 +33,10 @@ def getAuth():
 
 def query_restaurants(location):
     # Check to see if there is already an auth_token with sessionID (with Redis)
-    # auth_token = r.hget('Auth_Token')
+    # auth_token = r.hget(session, 'Auth_Token')
     # if auth_token == None:
     #    auth_token = getAuth()
+    #    r.hset(session, 'Auth_Token', auth_token)
     auth_token = getAuth()
     url_params = {
         'term': 'restaurants',
@@ -48,7 +49,7 @@ def query_restaurants(location):
         'Authorization': 'Bearer {0}'.format(auth_token),
     }
     response = requests.request('GET', url, headers=headers, params=url_params).json()
-    print(response)
+    print(response.type)
 
 # Used for unit testing
 if __name__ == '__main__':
