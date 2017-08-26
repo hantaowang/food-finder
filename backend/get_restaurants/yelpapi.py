@@ -32,12 +32,11 @@ def getAuth():
     return auth_token
 
 def query_restaurants(session, location):
-    # Check to see if there is already an auth_token with sessionID (with Redis)
+    Check to see if there is already an auth_token with sessionID (with Redis)
     auth_token = r.hget(session, 'Auth_Token')
     if auth_token == None:
        auth_token = getAuth()
        r.hset(session, 'Auth_Token', auth_token)
-
     url_params = {
         'term': 'restaurants',
         'location': location.replace(' ', '+'),
@@ -55,13 +54,13 @@ def query_restaurants(session, location):
     categories = {}
     response = response['businesses']
     for restaurant_details in response:
-        category_titles = [category_dict['title'] for category_dict in restaurant_details['categories']]
-        restaurants[restaurant_details['name']] = category_titles
-        for category in category_titles:
-            if category not in categories:
-                categories[category] = 0
-    print(restaurants)
-    print(categories)
+        restaurant_details_trunc = {}
+        category_map = {category_dict['title']:category_dict['alias'] for category_dict in restaurant_details['categories']}
+        restaurant_details_trunc = {'category_map': category_map, "image_url": restaurant_details['image_url']}
+        restaurants[restaurant_details['name']] = restaurant_details_trunc
+        for alias in category_map.values():
+            if alias not in categories:
+                categories[alias] = 0
     r.hset(session, 'restaurants', restaurants)
     r.hset(session, 'categories', categories)
 
