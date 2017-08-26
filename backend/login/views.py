@@ -16,14 +16,14 @@ def index(request):
 
         if type == "createuser":
             msg = generate_new_user(request.POST['NAME'], request.POST['PASS'])
-        if type == 'validate':
+        elif type == 'validate':
             if validate(request.POST['NAME'], request.POST['PASS']):
-                session = randint(100000, 999999)
-                while r.exists(session) == 1:
-                    session = randint(100000, 999999)
-                r.hset(session, "time", str(datetime.datetime.now()))
-                r.hset(session, "name", request.POST['NAME'])
-            msg = session
+                r.hset(request.POST['SESSION'], "name", request.POST['NAME'])
+                msg = "True"
+            else:
+                msg = "False"
+        elif type == 'session':
+            msg = new_session(r) 
         else:
             msg = "[ERROR] Invalid Command"
     except MultiValueDictKeyError as err:
