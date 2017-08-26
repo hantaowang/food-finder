@@ -1,23 +1,38 @@
-$( document ).ready(function() {
+$(document).ready(function(){
 
-console.log("OK");
+  var sessionID = null;
+  $.post("http://0.0.0.0:8000/api/login/", { TYPE: "session"},
+  function(data) {
+    sessionID = data;
+  });
 
-  $(".card-1").click(getAjax("card-1"));
-  $(".card-2").click(getAjax("card-2"));
+  $("#login").click(function(){
+    var email = $("#email").val();
+    var password = $("#password").val();
 
-  function getAJAX(cls) {
-    var xhttp = new XMLHttpRequest();
-    xhttp.open("GET", "0.0.0.0:4567/" +  cls);
-    xhttp.onload = function() {
-      var text = JSON.parse(xhttp.responseText)["text"];
-      var img = JSON.parse(xhttp.responseText)["img"];
-      renderHTML(cls, data, img);
-    };
-    xhttp.send();
-  }
+    $.post("http://0.0.0.0:8000/api/login/", { TYPE: "validate", NAME: email, PASS: password, SESSION: sessionID},
+    function(data) {
+      console.log(data)
+      if (data == 'False') {
+        alert("Incorrect Username and Password");
+      } else {
+        $("#title").html('Name: ' + data);
+      }
+    });
 
-  function renderHTML(cls, data, img) {
-    $("#animals").html(data);
-  }
+  });
 
+  $("#create").click(function(){
+    var email = $("#email").val();
+    var password = $("#password").val();
+
+    $.post("http://0.0.0.0:8000/api/login/", { TYPE: "createuser", NAME: email, PASS: password, SESSION: sessionID},
+    function(data) {
+      console.log(data)
+      if (data == 'Duplicate') {
+        alert("Username already exists");
+      }
+    });
+
+  });
 });

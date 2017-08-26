@@ -13,17 +13,21 @@
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
+
   <div class="container">
     <div class="jumbotron">
       <div class="row">
-        <div class="card col-6 card-1">
-          <img class="card-img-top" src="http://assets.epicurious.com/photos/57c5c6d9cf9e9ad43de2d96e/master/pass/the-ultimate-hamburger.jpg" alt="Card image cap">
-          <div class="card-block" id="card1">This is a hamburger</div>
-        </div>
-        <div class="card col-6 card-2">
-          <img class="card-img-top" src="https://upload.wikimedia.org/wikipedia/commons/9/94/Salad_platter.jpg" alt="Card image cap">
-          <div class="card-block" id="card2"> This is a salad </div>
-        </div>
+        <h1 id="title">Name: Default</h1>
+      </div>
+      <div class="row">
+        <form class="form" method="post" action="#">
+        <label>Email :</label>
+        <input type="text" name="demail" id="email">
+        <label>Password :</label>
+        <input type="password" name="password" id="password">
+        <input type="button" name="login" id="login" value="Login">
+        <input type="button" name="create" id="create" value="Create">
+        </form>
       </div>
     </div>
   </div>
