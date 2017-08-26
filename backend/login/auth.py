@@ -1,4 +1,5 @@
-import secrets, etcd, redis
+import secrets, etcd, redis, datetime
+from random import *
 import hashlib, binascii
 
 e = etcd.Client(host='0.0.0.0', port=2379)
@@ -12,7 +13,7 @@ def new_session(r):
 
 def generate_new_user(name, passw):
     if check_user_exists(name):
-        return "ERROR: User Already Exists"
+        return "Duplicate"
     salt = newsalt()
     key = hashlib.pbkdf2_hmac('sha256', passw.encode(), salt.encode(), 10000)
     e.write(name + "/salt", salt)
@@ -31,7 +32,7 @@ def check_user_exists(name):
 
 def validate(name, passw):
     if check_user_exists(name) == False:
-        return "ERROR: No Such User"
+        return False
     salt = e.read(name + "/salt").value
     key = hashlib.pbkdf2_hmac('sha256', passw.encode(), salt.encode(), 10000)
     return e.read(name + "/key").value == binascii.hexlify(key).decode()

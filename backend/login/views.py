@@ -19,7 +19,7 @@ def index(request):
         elif type == 'validate':
             if validate(request.POST['NAME'], request.POST['PASS']):
                 r.hset(request.POST['SESSION'], "name", request.POST['NAME'])
-                msg = "True"
+                msg = request.POST['NAME']
             else:
                 msg = "False"
         elif type == 'session':
