@@ -49,7 +49,21 @@ def query_restaurants(location):
         'Authorization': 'Bearer {0}'.format(auth_token),
     }
     response = requests.request('GET', url, headers=headers, params=url_params).json()
-    print(response.type)
+
+    # Processing data for redis
+    restaurants = {}
+    categories = {}
+    response = response['businesses']
+    for restaurant_details in response:
+        category_titles = [category_dict['title'] for category_dict in restaurant_details['categories']]
+        restaurants[restaurant_details['name']] = category_titles
+        for category in category_titles:
+            if category not in categories:
+                categories[category] = 0
+    print(restaurants)
+    print(categories)
+    # r.hset(session, 'restaurants', restaurants)
+    # r.hset(session, 'categories', categories)
 
 # Used for unit testing
 if __name__ == '__main__':
