@@ -3,6 +3,13 @@ import hashlib, binascii
 
 e = etcd.Client(host='0.0.0.0', port=2379)
 
+def new_session(r):
+    session = randint(100000, 999999)
+    while r.exists(session) == 1:
+        session = randint(100000, 999999)
+    r.hset(session, "time", str(datetime.datetime.now()))
+    return session
+
 def generate_new_user(name, passw):
     if check_user_exists(name):
         return "ERROR: User Already Exists"
