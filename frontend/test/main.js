@@ -6,6 +6,8 @@ $(document).ready(function(){
     sessionID = data;
   });
 
+  var next = "start"
+
   $("#login").click(function(){
     var email = $("#email").val();
     var password = $("#password").val();
@@ -28,10 +30,40 @@ $(document).ready(function(){
 
     $.post("http://0.0.0.0:8000/api/login/", { TYPE: "createuser", NAME: email, PASS: password, SESSION: sessionID},
     function(data) {
-      console.log(data)
+      console.log(data);
       if (data == 'Duplicate') {
         alert("Username already exists");
       }
+    });
+
+  });
+
+  $("#left").click(function(){
+    var loc = $("#location").val();
+
+    $.post("http://0.0.0.0:8000/api/get_restaurants/", { TYPE: next, SESSION: sessionID, LOCATION: loc, RESULT: "false"},
+    function(data) {
+      console.log(data);
+      data = JSON.parse(data);
+      $("#categories").html(data["categories"].join(", "));
+      $("#name").html(data["name"]);
+      $("#card_img").attr("src", data["img"]);
+      next = data["next"]
+    });
+
+  });
+
+  $("#right").click(function(){
+    var loc = $("#location").val();
+
+    $.post("http://0.0.0.0:8000/api/get_restaurants/", { TYPE: next, SESSION: sessionID, LOCATION: loc, RESULT: "true"},
+    function(data) {
+      console.log(data);
+      data = JSON.parse(data);
+      $("#categories").html(data["categories"].join(", "));
+      $("#name").html(data["name"]);
+      $("#card_img").attr("src", data["img"]);
+      next = data["next"]
     });
 
   });
