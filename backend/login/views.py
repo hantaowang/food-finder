@@ -10,22 +10,29 @@ from .auth import *
 r = redis.StrictRedis(host='0.0.0.0', port=6379)
 
 @csrf_exempt
-def index(request):
+def createuser(request):
     try:
-        type = request.POST['TYPE']
+        msg = generate_new_user(request.POST['NAME'], request.POST['PASS'])
+    except MultiValueDictKeyError as e:
+        msg = "[ERROR] Missing POST Parameter: {0}".format(str(e)[1:-1])
+    return HttpResponse(msg)
 
-        if type == "createuser":
-            msg = generate_new_user(request.POST['NAME'], request.POST['PASS'])
-        elif type == 'validate':
-            if validate(request.POST['NAME'], request.POST['PASS']):
-                r.hset(request.POST['SESSION'], "name", request.POST['NAME'])
-                msg = request.POST['NAME']
-            else:
-                msg = "False"
-        elif type == 'session':
-            msg = new_session(r) 
+@csrf_exempt
+def urlvalidate(request):
+    try:
+        if validate(request.POST['NAME'], request.POST['PASS']):
+            r.hset(request.POST['SESSION'], "name", request.POST['NAME'])
+            msg = request.POST['NAME']
         else:
-            msg = "[ERROR] Invalid Command"
-    except MultiValueDictKeyError as err:
-        msg = "[ERROR] Missing POST Parameter: {0}".format(str(err)[1:-1])
+            msg = "False"
+    except MultiValueDictKeyError as e:
+        msg = "[ERROR] Missing POST Parameter: {0}".format(str(e)[1:-1])
+    return HttpResponse(msg)
+
+@csrf_exempt
+def session(request):
+    try:
+        msg = new_session(r)
+    except MultiValueDictKeyError as e:
+        msg = "[ERROR] Missing POST Parameter: {0}".format(str(e)[1:-1])
     return HttpResponse(msg)

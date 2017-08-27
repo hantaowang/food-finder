@@ -1,7 +1,7 @@
 $(document).ready(function(){
 
   var sessionID = null;
-  $.post("http://0.0.0.0:8000/api/login/", { TYPE: "session"},
+  $.post("http://0.0.0.0:8000/api/login/session",
   function(data) {
     sessionID = data;
   });
@@ -12,7 +12,7 @@ $(document).ready(function(){
     var email = $("#email").val();
     var password = $("#password").val();
 
-    $.post("http://0.0.0.0:8000/api/login/", { TYPE: "validate", NAME: email, PASS: password, SESSION: sessionID},
+    $.post("http://0.0.0.0:8000/api/login/validate", { NAME: email, PASS: password, SESSION: sessionID},
     function(data) {
       console.log(data)
       if (data == 'False') {
@@ -28,7 +28,7 @@ $(document).ready(function(){
     var email = $("#email").val();
     var password = $("#password").val();
 
-    $.post("http://0.0.0.0:8000/api/login/", { TYPE: "createuser", NAME: email, PASS: password, SESSION: sessionID},
+    $.post("http://0.0.0.0:8000/api/login/createuser", { NAME: email, PASS: password, SESSION: sessionID},
     function(data) {
       console.log(data);
       if (data == 'Duplicate') {
@@ -40,8 +40,12 @@ $(document).ready(function(){
 
   $("#left").click(function(){
     var loc = $("#location").val();
+    if (loc == "") {
+      alert("You must enter a location");
+      return;
+    }
 
-    $.post("http://0.0.0.0:8000/api/get_restaurants/", { TYPE: next, SESSION: sessionID, LOCATION: loc, RESULT: "false"},
+    $.post("http://0.0.0.0:8000/api/get_restaurants/" + next, { SESSION: sessionID, LOCATION: loc, RESULT: "false"},
     function(data) {
       console.log(data);
       data = JSON.parse(data);
@@ -55,8 +59,12 @@ $(document).ready(function(){
 
   $("#right").click(function(){
     var loc = $("#location").val();
+    if (loc == "") {
+      alert("You must enter a location");
+      return;
+    }
 
-    $.post("http://0.0.0.0:8000/api/get_restaurants/", { TYPE: next, SESSION: sessionID, LOCATION: loc, RESULT: "true"},
+    $.post("http://0.0.0.0:8000/api/get_restaurants/" + next, { SESSION: sessionID, LOCATION: loc, RESULT: "true"},
     function(data) {
       console.log(data);
       data = JSON.parse(data);
