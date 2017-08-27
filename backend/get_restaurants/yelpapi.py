@@ -37,10 +37,10 @@ def query_restaurants(session, location):
     if auth_token == None:
        auth_token = getAuth()
        r.hset(session, 'Auth_Token', auth_token)
+    location = location.replace(' ', '+')
     url_params = {
         'term': 'restaurants',
-        'location': location.replace(' ', '+'),
-        'radius' : 3200,
+        'location': location,
         'limit' : 20,
     }
     url = 'https://api.yelp.com/v3/businesses/search'
@@ -56,11 +56,12 @@ def query_restaurants(session, location):
     for restaurant_details in response:
         restaurant_details_trunc = {}
         category_map = {category_dict['title']:category_dict['alias'] for category_dict in restaurant_details['categories']}
-        restaurant_details_trunc = {'category_map': category_map, "image_url": restaurant_details['image_url']}
+        restaurant_details_trunc = {'category_map': category_map, 'image_url': restaurant_details['image_url']}
         restaurants[restaurant_details['name']] = restaurant_details_trunc
         for alias in category_map.values():
             if alias not in categories:
                 categories[alias] = 0
+    r.hset(session, 'location', location)
     r.hset(session, 'restaurants', json.dumps(restaurants))
     r.hset(session, 'categories', json.dumps(categories))
 
@@ -93,12 +94,41 @@ def next_restaurant(session, result=False, first=False):
     msg = {"name": curr, 'categories': list(restaurants[curr]['category_map'].keys()), 'img': restaurants[curr]['image_url'], 'next': next}
     return json.dumps(msg)
 
-# TODO: actually implement this
 def get_recommend(session):
     categories = json.loads(r.hget(session, 'categories'))
-    top = sorted(categories, key=categories.get, reverse=True)[:5]
-    msg = {"name": "RESULTS", 'categories': top, 'img': 'http://thecatapi.com/api/images/get?format=src&type=gif', 'next': "None"}
-    return json.dumps(msg)
+    location = r.hget(session, 'location').decode('UTF-8')
+    highest_rated = sorted(categories, key=categories.get, reverse=True)[:3]
+    restaurants = {}
+    auth_token = r.hget(session, 'Auth_Token').decode('UTF-8')
+    index = 0
+    for category in highest_rated:
+        numb_of_restaurants = 5 - index
+        url_params = {
+            'term': 'restaurants',
+            'location': location,
+            'categories': category,
+            'limit' : numb_of_restaurants,
+        }
+        url = 'https://api.yelp.com/v3/businesses/search'
+        headers = {
+            'Authorization': 'Bearer {0}'.format(auth_token),
+        }
+        response = requests.request('GET', url, headers=headers, params=url_params).json()
+
+        # Processing restaurant data
+        response = response['businesses']
+        for restaurant_details in response:
+            category_titles = [category_dict['title'] for category_dict in restaurant_details['categories']]
+            address = '{0} {1}'.format(restaurant_details['location']['address1'], restaurant_details['location']['city'])
+            restaurant_details_trunc = {'categories': category_titles, 'image_url': restaurant_details['image_url'],
+                                        'url': restaurant_details['url'], 'price': restaurant_details['price'],
+                                        'rating': restaurant_details['rating'], 'phone': restaurant_details['phone'],
+                                        'is_closed': restaurant_details['is_closed'], 'address': address}
+            restaurants[restaurant_details['name']] = restaurant_details_trunc
+        index += 1
+    restaurants_json = json.dumps(restaurants)
+    r.hset(session, 'restaurants', restaurants_json)
+    return restaurants_json
 
 # Used for unit testing
 if __name__ == '__main__':
