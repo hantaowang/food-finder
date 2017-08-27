@@ -67,6 +67,8 @@ def query_restaurants(session, location):
 def next_restaurant(session, result=False, first=False):
     next = 'next'
     restaurants = json.loads(r.hget(session, 'restaurants'))
+
+    # Check result of previous restaurant
     if not first:
         prev = r.hget(session, 'curr').decode('UTF-8')
     if result:
@@ -84,6 +86,8 @@ def next_restaurant(session, result=False, first=False):
         return
     elif len(restaurants) == 1:
         next = 'results'
+
+    # Assign new restaurant
     curr = list(restaurants.keys())[0]
     r.hset(session, 'curr', curr)
     msg = {"name": curr, 'categories': list(restaurants[curr]['category_map'].keys()), 'img': restaurants[curr]['image_url'], 'next': next}
@@ -91,7 +95,9 @@ def next_restaurant(session, result=False, first=False):
 
 # TODO: actually implement this
 def get_recommend(session):
-    msg = {"name": "END", 'categories': ["YOU DONE"], 'img': 'http://thecatapi.com/api/images/get?format=src&type=gif', 'next': "None"}
+    categories = json.loads(r.hget(session, 'categories'))
+    top = sorted(categories, key=categories.get, reverse=True)[:5]
+    msg = {"name": "RESULTS", 'categories': top, 'img': 'http://thecatapi.com/api/images/get?format=src&type=gif', 'next': "None"}
     return json.dumps(msg)
 
 # Used for unit testing

@@ -37,7 +37,7 @@ def results(request):
     try:
         session = request.POST['SESSION']
         result = request.POST['RESULT'] == 'true'
-        next_restaurant(session, result)
+        next_restaurant(session, result=result)
         msg = get_recommend(session)
     except MultiValueDictKeyError as e:
         msg = errorMsg(e)
