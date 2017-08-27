@@ -2,6 +2,18 @@
   max-height: 300px;
 }
 
-.card:hover{
-  background-color: red;
+#rightarrow {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 50px 0 50px 86.6px;
+  border-color: transparent transparent transparent #007bff;
+}
+
+#leftarrow {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 50px 86.6px 50px 0;
+  border-color: transparent #007bff transparent transparent;
 }
