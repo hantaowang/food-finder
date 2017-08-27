@@ -32,7 +32,7 @@ def getAuth():
     return auth_token
 
 def query_restaurants(session, location):
-    Check to see if there is already an auth_token with sessionID (with Redis)
+    # Check to see if there is already an auth_token with sessionID (with Redis)
     auth_token = r.hget(session, 'Auth_Token')
     if auth_token == None:
        auth_token = getAuth()
@@ -61,8 +61,38 @@ def query_restaurants(session, location):
         for alias in category_map.values():
             if alias not in categories:
                 categories[alias] = 0
-    r.hset(session, 'restaurants', restaurants)
-    r.hset(session, 'categories', categories)
+    r.hset(session, 'restaurants', json.dumps(restaurants))
+    r.hset(session, 'categories', json.dumps(categories))
+
+def next_restaurant(session, result=False, first=False):
+    next = 'next'
+    restaurants = json.loads(r.hget(session, 'restaurants'))
+    if not first:
+        prev = r.hget(session, 'curr').decode('UTF-8')
+    if result:
+        categories = json.loads(r.hget(session, 'categories'))
+        for c in restaurants[prev]['category_map'].values():
+            categories[c] += 1
+        r.hset(session, 'categories', json.dumps(categories))
+        r.hset(session, 'restaurants', json.dumps(restaurants))
+        if len(restaurants) == 1:
+            next = 'results'
+    if not first:
+        restaurants.pop(prev)
+    r.hset(session, 'restaurants', json.dumps(restaurants))
+    if len(restaurants) == 0:
+        return
+    elif len(restaurants) == 1:
+        next = 'results'
+    curr = list(restaurants.keys())[0]
+    r.hset(session, 'curr', curr)
+    msg = {"name": curr, 'categories': list(restaurants[curr]['category_map'].keys()), 'img': restaurants[curr]['image_url'], 'next': next}
+    return json.dumps(msg)
+
+# TODO: actually implement this
+def get_recommend(session):
+    msg = {"name": "END", 'categories': ["YOU DONE"], 'img': 'http://thecatapi.com/api/images/get?format=src&type=gif', 'next': "None"}
+    return json.dumps(msg)
 
 # Used for unit testing
 if __name__ == '__main__':
