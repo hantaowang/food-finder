@@ -10,7 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
-import os
+import os, redis
+from django.utils.crypto import get_random_string
+
+r = redis.StrictRedis(host='0.0.0.0', port=6379)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,8 +22,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '&^dygw7y)lr4s4@u*fo-v&y1krxz3@$d4f=-uemu$)izfopi(l'
+# Generates new secret key every time, if one doesn't already exist
+if r.exists("SECRET_KEY"):
+    SECRET_KEY = r.get("SECRET_KEY").decode('UTF-8')
+else:
+    chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
+    SECRET_KEY = get_random_string(50, chars)
+    r.set("SECRET_KEY", SECRET_KEY)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
