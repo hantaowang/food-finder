@@ -4,15 +4,17 @@ import redis
 import requests
 import sys
 import urllib
+import configparser
 
 from urllib.error import HTTPError
 from urllib.parse import quote
 from urllib.parse import urlencode
 
-# TODO
-# Client_ID and Client_Secret constants (MUST REMOVE IF REPO IS PUBLIC)
-CLIENT_ID = 'Atz_4eQ6jE5PY839AWdoAQ'
-CLIENT_SECRET='raGawm10KZyS4pHsszfjKgE8LjjpIXkAehDfQeBVIIqwwHgKWCDOBQ2slAUMOdZI'
+# Read ID and SECRET from private config file
+config = configparser.ConfigParser()
+config.read('get_restaurants/yelp.ini')
+CLIENT_ID = config['yelp']['CLIENT_ID']
+CLIENT_SECRET = config['yelp']['CLIENT_SECRET']
 
 # Redis Client_ID
 r = redis.StrictRedis(host='0.0.0.0', port=6379)
