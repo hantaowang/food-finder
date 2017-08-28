@@ -21,3 +21,7 @@
 #list {
     display: None;
 }
+
+.clickable_row {
+  cursor: pointer;
+}
