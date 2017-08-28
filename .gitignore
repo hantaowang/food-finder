@@ -2,4 +2,4 @@
 .DS_Store
 default.etcd/
 __pycache__/
-yelp.ini
+/backend/get_restaurants/yelp.ini
