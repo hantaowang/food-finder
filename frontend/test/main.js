@@ -97,8 +97,7 @@ $(document).ready(function(){
 
   });
 
-  $(".z").click(function() {
-      alert('hi');
+  $(document).on("click", ".clickable_row", function() {
       id = $(this).attr('id');
       restaurant = restaurant_map[id];
       card_template = '<img class="card-img-top" src="' + details[restaurant]['image_url']
@@ -108,7 +107,7 @@ $(document).ready(function(){
                  + details[restaurant]['price'] + '<br /> Is Closed: ' + details[restaurant]['is_closed']
                  + '<br /> Phone: ' + details[restaurant]['phone'] + '<br /> Website: '
                  + details[restaurant]['url'] + '</p> </div>';
-      ("#result_card").html(card_template);
+      $("#result_card").html(card_template);
   });
 
   function buildtable(details){
@@ -117,13 +116,14 @@ $(document).ready(function(){
       restaurants = {};
       console.log(Object.keys(details).join(','));
       for (var r in details) {
-          template += '<tr class="z" id="table_details_' + n.toString() + '"> <td>' + r + '</td> <td>' + details[r]['categories'].join(', ') + '</td> </tr>';
-          n += 1;
+          template += '<tr class="clickable_row" id="table_details_' + n.toString() + '"> <td>' + r + '</td> <td>' + details[r]['categories'].join(', ') + '</td> </tr>';
           restaurants['table_details_' + n.toString()] = r;
+          n += 1;
       }
       template += '</tbody>';
 
       $("#resttable").html($("#resttable").html() + template);
+
       return restaurants;
   }
 });
