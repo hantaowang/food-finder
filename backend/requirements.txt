@@ -1,4 +1,2 @@
 redis
 python-etcd
-pycrypto
-

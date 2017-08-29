@@ -5,6 +5,7 @@ import requests
 import sys
 import urllib
 import configparser
+import os
 
 from urllib.error import HTTPError
 from urllib.parse import quote
@@ -17,7 +18,7 @@ CLIENT_ID = config['yelp']['CLIENT_ID']
 CLIENT_SECRET = config['yelp']['CLIENT_SECRET']
 
 # Redis Client_ID
-r = redis.StrictRedis(host='0.0.0.0', port=6379)
+r = redis.StrictRedis(host=os.getenv("redishost", "0.0.0.0"), port=6379)
 
 def getAuth():
     url = 'https://api.yelp.com/oauth2/token'

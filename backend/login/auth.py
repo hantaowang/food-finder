@@ -1,8 +1,10 @@
 import secrets, etcd, redis, datetime
 from random import *
-import hashlib, binascii
+import hashlib, binascii, os
 
-e = etcd.Client(host='0.0.0.0', port=2379)
+hosts = tuple((h, "2379") for h in os.getenv("etcdhost", "0.0.0.0").split(","))
+e = etcd.Client(host=hosts)
+
 
 def new_session(r):
     session = randint(100000, 999999)
