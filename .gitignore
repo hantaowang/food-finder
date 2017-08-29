@@ -3,3 +3,4 @@
 default.etcd/
 __pycache__/
 /backend/get_restaurants/yelp.ini
+node_modules/
