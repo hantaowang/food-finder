@@ -5,20 +5,32 @@ var namespace = createDeployment({namespace:"food-finder"});
 var base_machine = new Machine({
     provider: "Amazon",
     size: 'm4.large',
-    sshKeys: githubKeys("hantaowang"), // Your name here
+    sshKeys: githubKeys("hantaowang"), // Your github username here
     preemptible: true,
 });
 
-var Redis = require("./redis.js");
-var redis = new Redis(1, 'None');
-
 var Etcd = require("@quilt/etcd");
-var etcd = new etcd.Etcd(2);
+var etcd = new Etcd.Etcd(2);
 
-var food_finder = new Container("hantaowang/flaskapp")
-    .withEnv({"redishost": redis.hostname(), "etcdhost": etcd.hostname()});
+var Redis = require("@quilt/redis");
+var redis = new Redis(1, 'abcdef12345');
+
+var etcdhosts = ""
+etcd.cluster.forEach(function(c) {
+    etcdhosts += c.getHostname() + ",";
+});
+
+var app = new Container("django", "hantaowang/foodfinder")
+    .withEnv({"redishost": redis.master.getHostname(), "etcdhost": etcdhosts, "redispass": "abcdef12345"});
+
+app.allowFrom(redis.master, 6379);
+redis.master.allowFrom(app, 6379);
+
+etcd.cluster.forEach(function(c) {
+  app.allowFrom(c, 2379);
+  c.allowFrom(app, 2379);
+});
 
 namespace.deploy(base_machine.asMaster());
 namespace.deploy(base_machine.asWorker());
-namespace.deploy(redis);
-namespace.deploy(etcd);
+namespace.deploy([app, redis, etcd]);
