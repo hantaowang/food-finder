@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os, redis
 from django.utils.crypto import get_random_string
 
-r = redis.StrictRedis(host='0.0.0.0', port=6379)
+r = redis.StrictRedis(host=os.getenv("redishost", "0.0.0.0"), port=6379, password=os.getenv("redispass", None))
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

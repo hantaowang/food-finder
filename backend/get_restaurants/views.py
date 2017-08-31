@@ -5,7 +5,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 from .yelpapi import *
 import redis
 
-r = redis.StrictRedis(host=os.getenv("redishost", "0.0.0.0"), port=6379)
+r = redis.StrictRedis(host=os.getenv("redishost", "0.0.0.0"), port=6379, password=os.getenv("redispass", None))
 
 def errorMsg(e):
     return {"name": "ERROR", 'categories': ["Missing " + str(e)], 'img': 'http://thecatapi.com/api/images/get?format=src&type=gif', 'next': "None"}

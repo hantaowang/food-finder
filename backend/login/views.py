@@ -7,7 +7,7 @@ import redis, datetime
 from random import randint
 from .auth import *
 
-r = redis.StrictRedis(host=os.getenv("redishost", "0.0.0.0"), port=6379)
+r = redis.StrictRedis(host=os.getenv("redishost", "0.0.0.0"), port=6379, password=os.getenv("redispass", None))
 
 @csrf_exempt
 def createuser(request):
